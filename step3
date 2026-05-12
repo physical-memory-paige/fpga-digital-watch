@@ -1,0 +1,1 @@
+clear && pytest tests/test_$1.py

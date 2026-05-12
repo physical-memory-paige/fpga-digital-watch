@@ -1,0 +1,9 @@
+if [ $# -eq 1 ]; then
+    clear && verilator -Wall --lint-only -y rtl rtl/$1.sv
+else
+    rtlargs=()
+    for arg in "$@"; do
+        rtlargs+=("rtl/${arg}.sv")
+    done
+    clear && verilator -Wall --lint-only "${rtlargs[@]}"
+fi

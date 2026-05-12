@@ -31,6 +31,7 @@ async def test_up_down_counter(dut):
     assert int(dut.count.value) == 0, "Initial count should be 0"
     for _ in range(5):
         await tick(dut)
+    print(dut.count.value)
     assert int(dut.count.value) == 0, "Count should not change when disabled"
 
     # --- counts up ---
