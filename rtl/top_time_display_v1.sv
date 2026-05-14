@@ -32,11 +32,11 @@ module top_time_display_v1 #(
 
   logic clk_tick;
 
-  logic [1:0] clock_freq;
   localparam logic [1:0] State1hz = 2'b00;
   localparam logic [1:0] State25hz = 2'b01;
   localparam logic [1:0] State1khz = 2'b10;
   localparam logic [1:0] State50Mhz = 2'b11;
+  logic [1:0] clock_freq = State50Mhz;
 
   logic [3:0] digit5;
   logic [3:0] digit4;
@@ -46,69 +46,57 @@ module top_time_display_v1 #(
   logic [3:0] digit0;
 
   hms_counter #() hmsc (
-      .clk(clk_tick),
-      .enable(hms_enable),
+      .clk(CLOCK_50),
+      .enable(clk_tick),
       .hours(hours),
       .minutes(minutes),
       .seconds(seconds)
   );
 
-  restartable_rate_generator #(50_000_000) rrg1hz (
+  restartable_rate_generator #(CYCLES_PER_SECOND) rrg1hz (
       .clk (CLOCK_50),
-      .run (1'b1),
+      .run (clock_freq == State1hz),
       .tick(tick_1hz)
   );
-  restartable_rate_generator #(2_000_000) rrg25hz (
+  restartable_rate_generator #(CYCLES_PER_SECOND / 50) rrg25hz (
       .clk (CLOCK_50),
-      .run (1'b1),
+      .run (clock_freq == State25hz),
       .tick(tick_25hz)
   );
-  restartable_rate_generator #(50_000) rrg1khz (
+  restartable_rate_generator #(CYCLES_PER_SECOND / 1_000) rrg1khz (
       .clk (CLOCK_50),
-      .run (1'b1),
+      .run (clock_freq == State1khz),
       .tick(tick_1khz)
   );
 
 
 
-  seven_segment #(
-      .ACTIVE_LOW(1'b1)
-  ) ss_hex5 (
+  seven_segment #() ss_hex5 (
       .digit(digit5),
       .blank(1'b0),
       .segments(HEX5)
   );
-  seven_segment #(
-      .ACTIVE_LOW(1'b1)
-  ) ss_hex4 (
+  seven_segment #() ss_hex4 (
       .digit(digit4),
       .blank(1'b0),
       .segments(HEX4)
   );
-  seven_segment #(
-      .ACTIVE_LOW(1'b1)
-  ) ss_hex3 (
+  seven_segment #() ss_hex3 (
       .digit(digit3),
       .blank(1'b0),
       .segments(HEX3)
   );
-  seven_segment #(
-      .ACTIVE_LOW(1'b1)
-  ) ss_hex2 (
+  seven_segment #() ss_hex2 (
       .digit(digit2),
       .blank(1'b0),
       .segments(HEX2)
   );
-  seven_segment #(
-      .ACTIVE_LOW(1'b1)
-  ) ss_hex1 (
+  seven_segment #() ss_hex1 (
       .digit(digit1),
       .blank(1'b0),
       .segments(HEX1)
   );
-  seven_segment #(
-      .ACTIVE_LOW(1'b1)
-  ) ss_hex0 (
+  seven_segment #() ss_hex0 (
       .digit(digit0),
       .blank(1'b0),
       .segments(HEX0)
@@ -132,6 +120,7 @@ module top_time_display_v1 #(
 
   always_ff @(posedge CLOCK_50) begin
     clock_freq <= SW;
+    $display("Tick! %d, %f, %d, %d, %d", $time, $realtime, seconds, minutes, hours);
   end
 
   always_comb begin
@@ -139,9 +128,12 @@ module top_time_display_v1 #(
       State1hz:   clk_tick = tick_1hz;
       State25hz:  clk_tick = tick_25hz;
       State1khz:  clk_tick = tick_1khz;
-      State50Mhz: clk_tick = CLOCK_50;
+      State50Mhz: clk_tick = 1'b1;
     endcase
   end
 
+  initial begin
+    $monitor(seconds, minutes, hours);
+  end
 
 endmodule
