@@ -49,22 +49,75 @@ def all_defined(dut):
     return all(getattr(dut, s).value.is_resolvable for s in HEX_SIGNALS)
 
 
+seg_indices = {
+    "0000000": "blank",
+    "0111111": "0",
+    "0000110": "1",
+    "1011011": "2",
+    "1001111": "3",
+    "1100110": "4",
+    "1101101": "5",
+    "1111101": "6",
+    "0000111": "7",
+    "1111111": "8",
+    "1101111": "9",
+    "1110111": "a",
+    "1111100": "b",
+    "0111001": "c",
+    "1011110": "d",
+    "1111001": "e",
+    "1110001": "f",
+}
+
+
+def invertbits(input: str) -> str:
+    return f"{~int(input, 2):b}"
+
+
+import ctypes
+
+
+def invbitsint(input: int) -> str:
+    return f"{ctypes.c_uint32(~input).value:b}"[-7:].zfill(7)
+
+
+def print_segments(dut, cocotb):
+    outstr = seg_indices[invbitsint(dut.HEX5.value)]
+    outstr += ", " + seg_indices[invbitsint(dut.HEX4.value)]
+    outstr += ", " + seg_indices[invbitsint(dut.HEX3.value)]
+    outstr += ", " + seg_indices[invbitsint(dut.HEX2.value)]
+    outstr += ", " + seg_indices[invbitsint(dut.HEX1.value)]
+    outstr += ", " + seg_indices[invbitsint(dut.HEX0.value)]
+
+    # outstr = seg_indices[invbitsint(seg(5))]
+    # for i in range(4, -1, -1):
+    # outstr += ", " + seg_indices[invbitsint(seg(i))]
+    cocotb.log.info(f"Six-segment display: {outstr}")
+
+
 @cocotb.test()
 async def test_top_time_display_v1(dut):
     cocotb.start_soon(Clock(dut.CLOCK_50, 20, unit="ns").start())
     dut.SW.value = 0b00  # slow rate: enable stays low for millions of cycles
     await RisingEdge(dut.CLOCK_50)  # let initial block settle
+    cocotb.log.info("First time printing segments...")
+    print_segments(dut, cocotb)
 
     # --- SW=2'b11 (50 MHz): enable is high every cycle, counter advances ---
     cocotb.log.info("Test 1: SW=2'b11 --- HEX outputs are defined and counter advances")
     dut.SW.value = 0b11
     await tick(dut)
+    cocotb.log.info("Second time printing segments...")
+    print_segments(dut, cocotb)
     assert all_defined(dut), "HEX outputs must have no undefined bits with SW=2'b11"
     snap_initial = hex_snapshot(dut)
 
     # After 65 cycles the seconds have rolled over (0..59 -> 0) and minutes=1;
     # HEX0, HEX1, and HEX2 must all differ from their initial values.
     await tick_n(dut, 65)
+    cocotb.log.info("Third time printing segments...")
+    print_segments(dut, cocotb)
+
     assert all_defined(dut), "HEX outputs must remain defined after counting"
     snap_after = hex_snapshot(dut)
     assert snap_after != snap_initial, "HEX outputs must change when SW=2'b11"
@@ -89,6 +142,10 @@ async def test_top_time_display_v1(dut):
 
     # --- Exact HEX values at known state s=6, m=1, h=0 ---
     cocotb.log.info("Test 3: exact HEX values at s=6, m=1, h=0")
+
+    cocotb.log.info("Fourth time printing segments...")
+    print_segments(dut, cocotb)
+
     # hours=0  → tens=0, ones=0
     assert int(dut.HEX5.value) == seg(0), f"HEX5 (hours tens=0):   expected {seg(0)}"
     assert int(dut.HEX4.value) == seg(0), f"HEX4 (hours ones=0):   expected {seg(0)}"
@@ -135,7 +192,9 @@ async def test_top_time_display_v1(dut):
         if hex_snapshot(dut) != snap:
             break
     else:
-        assert False, f"1 kHz: seconds did not advance within {PERIOD + PERIOD // 5} cycles"
+        assert False, (
+            f"1 kHz: seconds did not advance within {PERIOD + PERIOD // 5} cycles"
+        )
     # First tick consumed; now measure the next full period exactly.
     snap = hex_snapshot(dut)
     cycles = 0
@@ -145,5 +204,9 @@ async def test_top_time_display_v1(dut):
         if hex_snapshot(dut) != snap:
             break
     else:
-        assert False, f"1 kHz: seconds did not advance again within {PERIOD + PERIOD // 10} cycles"
-    assert cycles == PERIOD, f"1 kHz tick period: expected {PERIOD} cycles, got {cycles}"
+        assert False, (
+            f"1 kHz: seconds did not advance again within {PERIOD + PERIOD // 10} cycles"
+        )
+    assert cycles == PERIOD, (
+        f"1 kHz tick period: expected {PERIOD} cycles, got {cycles}"
+    )
