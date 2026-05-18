@@ -16,9 +16,20 @@ def get_rtl_root() -> Path:
         return PROJECT_ROOT / "rtl"
 
     path = Path(rtl_dir).expanduser()
-    if not path.is_absolute():
-        path = PROJECT_ROOT / path
-    return path
+    if path.is_absolute():
+        return path.resolve()
+
+    # Relative paths: try cwd first (standard Unix convention), then
+    # project root as a fallback. This lets both "RTL_DIR=rtl_solution"
+    # from the project root and "RTL_DIR=../rtl_solution" from tests/ work,
+    # and avoids breaking when conftest is imported from a subprocess
+    # (e.g. cocotb's pytest assertion-rewriting hook) with a different cwd.
+    for base in (Path.cwd(), PROJECT_ROOT):
+        candidate = (base / path).resolve()
+        if candidate.is_dir():
+            return candidate
+
+    return (PROJECT_ROOT / path).resolve()
 
 
 RTL_ROOT = get_rtl_root()
@@ -51,6 +62,14 @@ def resolve_rtl_path(filename):
         return path
     else:
         return RTL_ROOT / filename
+
+
+def resolve_sby_path(filename):
+    path = Path(filename)
+    if path.is_absolute():
+        return path
+    else:
+        return PROJECT_ROOT / "sby" / filename
 
 
 @pytest.fixture(scope="session")
@@ -96,6 +115,7 @@ def cocotb_runner(sim_name):
             timescale=("1ns", "1ps"),
             build_dir=build_dir,
             always=True,
+            build_args=["-y", str(RTL_ROOT), "-Y", ".sv"],
         )
 
         runner.test(
@@ -116,3 +136,13 @@ def rtl_exists(filename):
                   or absolute path for full control
     """
     return resolve_rtl_path(filename).exists()
+
+
+def sby_exists(filename):
+    """Check if a SymbiYosys spec file exists.
+
+    Args:
+        filename: Relative path (assumed in sby/), e.g., "mod_n_counter.sby"
+                  or absolute path for full control
+    """
+    return resolve_sby_path(filename).exists()

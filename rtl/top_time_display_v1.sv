@@ -36,7 +36,6 @@ module top_time_display_v1 #(
   localparam logic [1:0] State25hz = 2'b01;
   localparam logic [1:0] State1khz = 2'b10;
   localparam logic [1:0] State50Mhz = 2'b11;
-  logic [1:0] clock_freq = State50Mhz;
 
   logic [3:0] digit5;
   logic [3:0] digit4;
@@ -68,8 +67,6 @@ module top_time_display_v1 #(
       .run (clock_freq == State1khz),
       .tick(tick_1khz)
   );
-
-
 
   seven_segment #() ss_hex5 (
       .digit(digit5),
@@ -118,22 +115,13 @@ module top_time_display_v1 #(
       .ones(digit0)
   );
 
-  always_ff @(posedge CLOCK_50) begin
-    clock_freq <= SW;
-    $display("Tick! %d, %f, %d, %d, %d", $time, $realtime, seconds, minutes, hours);
-  end
-
   always_comb begin
-    unique case (clock_freq)
+    unique case (SW)
       State1hz:   clk_tick = tick_1hz;
       State25hz:  clk_tick = tick_25hz;
       State1khz:  clk_tick = tick_1khz;
       State50Mhz: clk_tick = 1'b1;
     endcase
-  end
-
-  initial begin
-    $monitor(seconds, minutes, hours);
   end
 
 endmodule

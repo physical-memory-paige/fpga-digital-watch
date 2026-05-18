@@ -117,10 +117,13 @@ async def test_top_time_display_v1(dut):
     await tick_n(dut, 65)
     cocotb.log.info("Third time printing segments...")
     print_segments(dut, cocotb)
+    cocotb.log.info(f"Snap snap_really_before : {hex_snapshot(dut)}")
 
     assert all_defined(dut), "HEX outputs must remain defined after counting"
     snap_after = hex_snapshot(dut)
     assert snap_after != snap_initial, "HEX outputs must change when SW=2'b11"
+    cocotb.log.info("star time printing segments...")
+    print_segments(dut, cocotb)
 
     # State here: s=6, m=1, h=0  (1 + 65 ticks of SW=2'b11)
 
@@ -133,10 +136,15 @@ async def test_top_time_display_v1(dut):
         dut.SW.value = sw_val
         await tick(dut)
         snap_before = hex_snapshot(dut)
+        cocotb.log.info(f"Snap_before : {snap_before}")
         await tick_n(dut, 5)
         assert hex_snapshot(dut) == snap_before, (
             f"Counter must hold with SW=2'b{sw_val:02b}"
         )
+
+        cocotb.log.info(f"Snap after : {hex_snapshot(dut)}")
+    cocotb.log.info("diamond time printing segments...")
+    print_segments(dut, cocotb)
 
     # State here: still s=6, m=1, h=0 (all ticks above used slow SW)
 
@@ -145,14 +153,15 @@ async def test_top_time_display_v1(dut):
 
     cocotb.log.info("Fourth time printing segments...")
     print_segments(dut, cocotb)
+    cocotb.log.info(f"Snap really after : {hex_snapshot(dut)}")
 
-    # hours=0  → tens=0, ones=0
+    # hours=0  -> tens=0, ones=0
     assert int(dut.HEX5.value) == seg(0), f"HEX5 (hours tens=0):   expected {seg(0)}"
     assert int(dut.HEX4.value) == seg(0), f"HEX4 (hours ones=0):   expected {seg(0)}"
-    # minutes=1 → tens=0, ones=1
+    # minutes=1 -> tens=0, ones=1
     assert int(dut.HEX3.value) == seg(0), f"HEX3 (minutes tens=0): expected {seg(0)}"
     assert int(dut.HEX2.value) == seg(1), f"HEX2 (minutes ones=1): expected {seg(1)}"
-    # seconds=6 → tens=0, ones=6
+    # seconds=6 -> tens=0, ones=6
     assert int(dut.HEX1.value) == seg(0), f"HEX1 (seconds tens=0): expected {seg(0)}"
     assert int(dut.HEX0.value) == seg(6), f"HEX0 (seconds ones=6): expected {seg(6)}"
 
@@ -170,7 +179,7 @@ async def test_top_time_display_v1(dut):
     assert hex_snapshot(dut) == snap_frozen, (
         "Counter must hold when SW switches to a slow rate"
     )
-    # Resume: one more tick at SW=2'b11 → s=11, ones=1
+    # Resume: one more tick at SW=2'b11 -> s=11, ones=1
     dut.SW.value = 0b11
     await tick(dut)
     assert int(dut.HEX0.value) == seg(1), (
