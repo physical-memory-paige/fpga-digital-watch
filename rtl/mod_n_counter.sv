@@ -1,7 +1,7 @@
 `timescale 1 ns / 1 ps
 
 module mod_n_counter #(
-    parameter int N = 4,
+    parameter int N = 4,  // Maximum value attained N-1
     parameter int WIDTH = 2
 ) (
     input logic clk,

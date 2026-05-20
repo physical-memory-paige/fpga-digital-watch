@@ -3,11 +3,11 @@ from cocotb.clock import Clock
 from cocotb.triggers import RisingEdge, Timer
 
 # Must match the parameters passed by the test runner.
-HOLD_CYCLES   = 8
+HOLD_CYCLES = 8
 REPEAT_CYCLES = 3
 # Hold threshold passed to button_hold_detect inside the DUT.
 # held goes high after this many consecutive held cycles.
-QUAL_CYCLES = HOLD_CYCLES - REPEAT_CYCLES + 1   # = 6
+QUAL_CYCLES = HOLD_CYCLES - REPEAT_CYCLES + 1  # = 6
 
 
 async def step(dut):
@@ -80,7 +80,7 @@ async def test_no_repeat_on_short_press(dut):
     await reset_dut(dut)
 
     dut.button.value = 1
-    for i in range(QUAL_CYCLES - 1):   # hold for one cycle short of qualifying
+    for i in range(QUAL_CYCLES - 1):  # hold for one cycle short of qualifying
         await step(dut)
         assert int(dut.pulse.value) == 0, (
             f"pulse must be low on cycle {i + 1} during a short press "
@@ -131,7 +131,9 @@ async def test_repeat_pulse_one_cycle_wide(dut):
     assert int(dut.pulse.value) == 1, "first repeat must be high on the firing cycle"
 
     await step(dut)
-    assert int(dut.pulse.value) == 0, "repeat pulse must deassert after exactly one cycle"
+    assert int(dut.pulse.value) == 0, (
+        "repeat pulse must deassert after exactly one cycle"
+    )
 
 
 @cocotb.test()
@@ -161,9 +163,7 @@ async def test_pulse_train_periodic(dut):
                 f"period {period}: pulse must be low at step {i + 1}"
             )
         await step(dut)
-        assert int(dut.pulse.value) == 1, (
-            f"period {period}: repeat pulse must fire"
-        )
+        assert int(dut.pulse.value) == 1, f"period {period}: repeat pulse must fire"
 
 
 @cocotb.test()
@@ -209,7 +209,7 @@ async def test_repeat_restarts_after_release(dut):
 
     # Release
     dut.button.value = 0
-    await step(dut)   # latency cycle
+    await step(dut)  # latency cycle
     for _ in range(REPEAT_CYCLES + 1):
         await step(dut)
         assert int(dut.pulse.value) == 0, "pulse must cease after release"
@@ -230,6 +230,4 @@ async def test_repeat_restarts_after_release(dut):
 
     # Step HOLD_CYCLES: repeat fires again
     await step(dut)
-    assert int(dut.pulse.value) == 1, (
-        "re-press: repeat must fire again at HOLD_CYCLES"
-    )
+    assert int(dut.pulse.value) == 1, "re-press: repeat must fire again at HOLD_CYCLES"

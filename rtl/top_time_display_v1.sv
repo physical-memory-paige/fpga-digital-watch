@@ -13,18 +13,9 @@ module top_time_display_v1 #(
     output logic [6:0] HEX0
 );
 
-  localparam int NHours = 24;
-  localparam int NMinutes = 60;
-  localparam int NSeconds = 60;
-
-  localparam int WHours = 5;
-  localparam int WMinutes = 6;
-  localparam int WSeconds = 6;
-
-  logic hms_enable = 1;
-  logic [WHours-1:0] hours;
-  logic [WMinutes-1:0] minutes;
-  logic [WSeconds-1:0] seconds;
+  logic [4:0] hours;
+  logic [5:0] minutes;
+  logic [5:0] seconds;
 
   logic tick_1hz;
   logic tick_25hz;
@@ -37,14 +28,17 @@ module top_time_display_v1 #(
   localparam logic [1:0] State1khz = 2'b10;
   localparam logic [1:0] State50Mhz = 2'b11;
 
-  logic [3:0] digit5;
-  logic [3:0] digit4;
-  logic [3:0] digit3;
-  logic [3:0] digit2;
-  logic [3:0] digit1;
-  logic [3:0] digit0;
+  wire [3:0] digit_a[6];
+  wire [6:0] hex_a  [6];
+  wire [6:0] value_a[3];
 
-  hms_counter #() hmsc (
+  assign {value_a[0], value_a[1], value_a[2]} = {7'(seconds), 7'(minutes), 7'(hours)};
+  assign {HEX0, HEX1, HEX2, HEX3, HEX4, HEX5} = {
+    hex_a[0], hex_a[1], hex_a[2], hex_a[3], hex_a[4], hex_a[5]
+  };
+
+
+  hms_counter hmsc (
       .clk(CLOCK_50),
       .enable(clk_tick),
       .hours(hours),
@@ -54,66 +48,38 @@ module top_time_display_v1 #(
 
   restartable_rate_generator #(CYCLES_PER_SECOND) rrg1hz (
       .clk (CLOCK_50),
-      .run (clock_freq == State1hz),
+      .run (1'b1),
       .tick(tick_1hz)
   );
   restartable_rate_generator #(CYCLES_PER_SECOND / 50) rrg25hz (
       .clk (CLOCK_50),
-      .run (clock_freq == State25hz),
+      .run (1'b1),
       .tick(tick_25hz)
   );
   restartable_rate_generator #(CYCLES_PER_SECOND / 1_000) rrg1khz (
       .clk (CLOCK_50),
-      .run (clock_freq == State1khz),
+      .run (1'b1),
       .tick(tick_1khz)
   );
 
-  seven_segment #() ss_hex5 (
-      .digit(digit5),
-      .blank(1'b0),
-      .segments(HEX5)
-  );
-  seven_segment #() ss_hex4 (
-      .digit(digit4),
-      .blank(1'b0),
-      .segments(HEX4)
-  );
-  seven_segment #() ss_hex3 (
-      .digit(digit3),
-      .blank(1'b0),
-      .segments(HEX3)
-  );
-  seven_segment #() ss_hex2 (
-      .digit(digit2),
-      .blank(1'b0),
-      .segments(HEX2)
-  );
-  seven_segment #() ss_hex1 (
-      .digit(digit1),
-      .blank(1'b0),
-      .segments(HEX1)
-  );
-  seven_segment #() ss_hex0 (
-      .digit(digit0),
-      .blank(1'b0),
-      .segments(HEX0)
-  );
+  genvar i;
+  generate
+    for (i = 0; i < 6; i++) begin : g_ss_display
+      seven_segment u_ss_hex (
+          .digit(digit_a[i]),
+          .blank(1'b0),
+          .segments(hex_a[i])
+      );
+    end
 
-  binary_to_bcd #() b2b_hours (
-      .bin (7'(hours)),
-      .tens(digit5),
-      .ones(digit4)
-  );
-  binary_to_bcd #() b2b_minutes (
-      .bin (7'(minutes)),
-      .tens(digit3),
-      .ones(digit2)
-  );
-  binary_to_bcd #() b2b_seconds (
-      .bin (7'(seconds)),
-      .tens(digit1),
-      .ones(digit0)
-  );
+    for (i = 0; i < 3; i++) begin : g_bin_to_bcd
+      binary_to_bcd u_b2b (
+          .bin (value_a[i]),
+          .tens(digit_a[2*i+1]),
+          .ones(digit_a[2*i])
+      );
+    end
+  endgenerate
 
   always_comb begin
     unique case (SW)
