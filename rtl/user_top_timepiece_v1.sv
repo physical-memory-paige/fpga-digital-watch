@@ -1,5 +1,5 @@
 `timescale 1 ns / 1 ps
-;
+
 
 module user_top_timepiece_v1 #(
     parameter int CYCLES_PER_SECOND = 50_000_000

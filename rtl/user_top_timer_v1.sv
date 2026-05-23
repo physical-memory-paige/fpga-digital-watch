@@ -128,7 +128,8 @@ module user_top_timer_v1 #(
 
 
   logic all_zeroes;
-  assign all_zeroes = ({hours_disp, minutes_disp, seconds_disp} == '0);
+  assign all_zeroes = (hours == 0 && minutes == 0 && seconds == 0);
+  //   assign all_zeroes = ({hours_disp, minutes_disp, seconds_disp} == '0);
   //   logic prev_zeroes = 1'b1;
   //   always_ff @(posedge clk) prev_zeroes <= all_zeroes;
 
