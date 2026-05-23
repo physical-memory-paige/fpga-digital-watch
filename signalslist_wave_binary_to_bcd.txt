@@ -1,0 +1,6 @@
+wave_binary_to_bcd.tens
+wave_binary_to_bcd.ones
+wave_binary_to_bcd.bin
+wave_binary_to_bcd.dut.bin
+wave_binary_to_bcd.dut.tens
+wave_binary_to_bcd.dut.ones

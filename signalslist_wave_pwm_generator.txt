@@ -1,0 +1,11 @@
+wave_pwm_generator.pwm_out
+wave_pwm_generator.clk
+wave_pwm_generator.rst
+wave_pwm_generator.dut.clk
+wave_pwm_generator.dut.rst
+wave_pwm_generator.dut.DUTY_CYCLES
+wave_pwm_generator.dut.PERIOD_CYCLES
+wave_pwm_generator.dut.pwm_out
+wave_pwm_generator.dut.Counterwidth
+wave_pwm_generator.dut.count
+wave_pwm_generator.dut.next_count

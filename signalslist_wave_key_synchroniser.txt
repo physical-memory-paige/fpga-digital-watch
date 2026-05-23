@@ -1,0 +1,7 @@
+wave_key_synchroniser.key_sync
+wave_key_synchroniser.clk
+wave_key_synchroniser.key_n
+wave_key_synchroniser.dut.clk
+wave_key_synchroniser.dut.key_n
+wave_key_synchroniser.dut.key_ff_1
+wave_key_synchroniser.dut.key_sync

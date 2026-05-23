@@ -1,5 +1,5 @@
 if [ $# -eq 1 ]; then
-    clear && iverilog -Wall -g2012 -Y .sv -y rtl tb/wave_$1.v && /workspace/a.out
+    iverilog -Wall -g2012 -Y .sv -y rtl tb/wave_$1.v && /workspace/a.out
 else
     rtlargs=()
     for arg in "$@"; do

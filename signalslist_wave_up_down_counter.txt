@@ -1,0 +1,11 @@
+wave_up_down_counter.count
+wave_up_down_counter.clk
+wave_up_down_counter.enable
+wave_up_down_counter.up
+wave_up_down_counter.dut.clk
+wave_up_down_counter.dut.enable
+wave_up_down_counter.dut.up
+wave_up_down_counter.dut.MAX
+wave_up_down_counter.dut.WIDTH
+wave_up_down_counter.dut.count
+wave_up_down_counter.dut.next_count

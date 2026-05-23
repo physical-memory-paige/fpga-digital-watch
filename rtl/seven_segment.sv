@@ -18,9 +18,8 @@ module seven_segment #(
     output logic [6:0] segments
 );
 
-  logic blah;
 
-  always_comb begin
+  always_comb
     unique casez ({
       blank, digit
     })
@@ -42,8 +41,5 @@ module seven_segment #(
       {1'b0, 4'hE} : segments = 7'b1111001 ^ {7{ACTIVE_LOW[0]}};  // Digit E
       {1'b0, 4'hF} : segments = 7'b1110001 ^ {7{ACTIVE_LOW[0]}};  // Digit F
     endcase
-    if (ACTIVE_LOW) blah = 1'b1;
-    else blah = 1'b0;
-  end
 
 endmodule
