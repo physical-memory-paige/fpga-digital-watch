@@ -1,7 +1,7 @@
-wave_seven_segment.segments
 wave_seven_segment.blank
-wave_seven_segment.digit
-wave_seven_segment.dut.blank
-wave_seven_segment.dut.digit
+wave_seven_segment.digit[3:0]
 wave_seven_segment.dut.ACTIVE_LOW
-wave_seven_segment.dut.segments
+wave_seven_segment.dut.blank
+wave_seven_segment.dut.digit[3:0]
+wave_seven_segment.dut.segments[6:0]
+wave_seven_segment.segments[6:0]

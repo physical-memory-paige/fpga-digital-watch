@@ -1,7 +1,7 @@
-wave_rising_edge_detector.rise
 wave_rising_edge_detector.clk
-wave_rising_edge_detector.sig_in
 wave_rising_edge_detector.dut.clk
-wave_rising_edge_detector.dut.sig_in
 wave_rising_edge_detector.dut.last_sig
 wave_rising_edge_detector.dut.rise
+wave_rising_edge_detector.dut.sig_in
+wave_rising_edge_detector.rise
+wave_rising_edge_detector.sig_in

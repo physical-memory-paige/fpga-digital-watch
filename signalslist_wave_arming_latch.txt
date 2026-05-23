@@ -1,8 +1,8 @@
-wave_arming_latch.armed
 wave_arming_latch.arm
+wave_arming_latch.armed
 wave_arming_latch.clk
 wave_arming_latch.disarm
 wave_arming_latch.dut.arm
+wave_arming_latch.dut.armed
 wave_arming_latch.dut.clk
 wave_arming_latch.dut.disarm
-wave_arming_latch.dut.armed
