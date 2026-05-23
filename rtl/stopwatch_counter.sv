@@ -14,9 +14,9 @@ module stopwatch_counter #(
   localparam int NCentiseconds = 100;
   localparam int NSeconds = 60;
   localparam int NMinutes = 100;
-  localparam int WCentiseconds = 7;  //$clog2(N_Centiseconds);
-  localparam int WSeconds = 6;  //$clog2(N_Seconds);
-  localparam int WMinutes = 7;  //$clog2(N_Minutes);
+  localparam int WCentiseconds = 7;
+  localparam int WSeconds = 6;
+  localparam int WMinutes = 7;
 
   logic centisecond_tick;
 

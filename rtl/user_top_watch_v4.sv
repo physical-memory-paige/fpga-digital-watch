@@ -74,7 +74,6 @@ module user_top_watch_v4 #(
       .count(minutes)
   );
 
-
   // Hours
   logic hours_tick;
   logic hours_edit;
@@ -163,6 +162,7 @@ module user_top_watch_v4 #(
       .button(button[1]),
       .pulse(inc_event)
   );
+
   logic dec_event;
   button_auto_repeat #(
       .HOLD_CYCLES  (CYCLES_PER_SECOND / 2),  // begin > 0.5s

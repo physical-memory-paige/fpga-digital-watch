@@ -37,7 +37,7 @@ module top_de1_soc (
   logic blank_hours, blank_minutes, blank_seconds;
 
   // Replace user_top with your user top-level module
-  user_top_watch_v4 #(
+  user_top_stopwatch_v1 #(
       .CYCLES_PER_SECOND(50_000_000)
   ) u_user_top (
       .clk          (CLOCK_50),

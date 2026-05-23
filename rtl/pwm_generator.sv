@@ -12,30 +12,33 @@ module pwm_generator #(
     output logic pwm_out
 );
 
-  if (DUTY_CYCLES == 0) begin : g_special1
-    assign pwm_out = 1'b0;
-  end else if (DUTY_CYCLES >= PERIOD_CYCLES) begin : g_special2
-    assign pwm_out = 1'b1;
-  end else begin : g_general
-    localparam int Counterwidth = $clog2(PERIOD_CYCLES);
+  generate
+    if (DUTY_CYCLES == 0) begin : g_special1
+      assign pwm_out = 1'b0;
+    end else if (DUTY_CYCLES >= PERIOD_CYCLES) begin : g_special2
+      assign pwm_out = 1'b1;
+    end else begin : g_general
+      localparam int Counterwidth = $clog2(PERIOD_CYCLES);
 
-    logic [Counterwidth-1:0] count;
-    logic [Counterwidth-1:0] next_count;
 
-    // Next-state logic
-    always_comb
-      if (count < Counterwidth'(PERIOD_CYCLES - 1)) next_count = count + 1;
-      else next_count = 0;
+      logic [Counterwidth-1:0] count;
+      logic [Counterwidth-1:0] next_count;
 
-    // Updating state
-    always_ff @(posedge clk)
-      if (rst) count <= '0;
-      else count <= next_count;
+      // Next-state logic
+      always_comb
+        if (count < Counterwidth'(PERIOD_CYCLES - 1)) next_count = count + 1;
+        else next_count = 0;
 
-    // Output logic
-    always_comb
-      if (count <= Counterwidth'(DUTY_CYCLES - 1)) pwm_out = 1'b1;
-      else pwm_out = 1'b0;
-  end
+      // Updating state
+      always_ff @(posedge clk)
+        if (rst) count <= '0;
+        else count <= next_count;
+
+      // Output logic
+      always_comb
+        if (count <= Counterwidth'(DUTY_CYCLES - 1)) pwm_out = 1'b1;
+        else pwm_out = 1'b0;
+    end
+  endgenerate
 
 endmodule
