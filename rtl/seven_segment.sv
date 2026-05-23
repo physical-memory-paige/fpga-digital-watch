@@ -1,4 +1,14 @@
 `timescale 1ns / 1ps
+// Seven -segment display decoder for hexadecimal digits.
+//
+// Parameters:
+// ACTIVE_LOW - 1 for active -low LEDs (for example , DE1 -SoC), 0 for active -high.
+//
+// Ports:
+// digit [3:0] - Hexadecimal digit to display (0x0 to 0xF).
+// blank - When high , all segments are turned off.
+// segments [6:0] - Segment outputs [g,f,e,d,c,b,a].
+
 
 module seven_segment #(
     parameter int ACTIVE_LOW = 1
@@ -8,7 +18,9 @@ module seven_segment #(
     output logic [6:0] segments
 );
 
-  always_comb
+  logic blah;
+
+  always_comb begin
     unique casez ({
       blank, digit
     })
@@ -30,5 +42,8 @@ module seven_segment #(
       {1'b0, 4'hE} : segments = 7'b1111001 ^ {7{ACTIVE_LOW[0]}};  // Digit E
       {1'b0, 4'hF} : segments = 7'b1110001 ^ {7{ACTIVE_LOW[0]}};  // Digit F
     endcase
+    if (ACTIVE_LOW) blah = 1'b1;
+    else blah = 1'b0;
+  end
 
 endmodule

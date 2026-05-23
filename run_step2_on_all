@@ -1,0 +1,4 @@
+for file in rtl/*.sv; do
+    filename="${file%.*}"
+    ./step2 "$filename"
+done
