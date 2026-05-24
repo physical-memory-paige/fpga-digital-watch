@@ -127,7 +127,7 @@ module user_top_watch_v4 #(
       .mode_enable(mode_enable)
   );
 
-  assign rst_seconds  = (mode_enable[0] && button[3]);
+  assign rst_seconds  = mode_enable[0];
 
   assign seconds_edit = mode_enable[0];
   assign minutes_edit = mode_enable[1];

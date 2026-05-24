@@ -11,11 +11,8 @@ module mod_n_counter #(
 );
 
   logic [WIDTH-1:0] next_count;
-  always_comb begin
-    if (count < WIDTH'(N - 1)) next_count = count + 1;
-    else next_count = 0;
-  end
 
+  assign next_count = (count < WIDTH'(N - 1)) ? count + WIDTH'(1) : '0;
 
   always_ff @(posedge clk)
     if (rst) count <= '0;

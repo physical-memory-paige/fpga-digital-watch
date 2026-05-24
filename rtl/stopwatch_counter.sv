@@ -36,7 +36,6 @@ module stopwatch_counter #(
       .count0(centiseconds)
   );
 
-
   restartable_rate_generator #(
       .CYCLE_COUNT(CYCLES_PER_SECOND / 100)
   ) u_centisecond_timer (
