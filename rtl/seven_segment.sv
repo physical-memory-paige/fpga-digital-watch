@@ -20,7 +20,7 @@ module seven_segment #(
 
 
   always_comb
-    unique casez ({
+    casez ({
       blank, digit
     })
       {1'b1, 4'h?} : segments = 7'b0000000 ^ {7{ACTIVE_LOW[0]}};  // Blank
@@ -40,6 +40,7 @@ module seven_segment #(
       {1'b0, 4'hD} : segments = 7'b1011110 ^ {7{ACTIVE_LOW[0]}};  // Digit d
       {1'b0, 4'hE} : segments = 7'b1111001 ^ {7{ACTIVE_LOW[0]}};  // Digit E
       {1'b0, 4'hF} : segments = 7'b1110001 ^ {7{ACTIVE_LOW[0]}};  // Digit F
+      default: segments = 7'b0000000 ^ {7{ACTIVE_LOW[0]}};  // Digit F
     endcase
 
 endmodule

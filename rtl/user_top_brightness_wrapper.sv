@@ -40,6 +40,17 @@ module user_top_brightness_wrapper #(
   localparam logic [1:0] BMed = 2'b11;
   localparam logic [1:0] BFull = 2'b10;
 
+  localparam int Period = CYCLES_PER_SECOND / 1000;  // Clock cycles in period
+  localparam int PeriodWidth = $clog2(Period);
+  localparam int BDimDutyCycleDuration = Period / 8;
+  localparam int BLowDutyCycleDuration = Period / 4;
+  localparam int BMedDutyCycleDuration = Period / 2;
+  localparam int BFullDutyCycleDuration = Period / 1;
+
+  logic blank_hours_internal;
+  logic blank_minutes_internal;
+  logic blank_seconds_internal;
+
   user_top #(
       .CYCLES_PER_SECOND(CYCLES_PER_SECOND)
   ) u_top (
@@ -55,16 +66,6 @@ module user_top_brightness_wrapper #(
       .blank_seconds(blank_seconds_internal)
   );
 
-  localparam int Period = CYCLES_PER_SECOND / 1000;  // Clock cycles in period
-  localparam int PeriodWidth = $clog2(Period);
-  localparam int BDimDutyCycleDuration = Period / 8;
-  localparam int BLowDutyCycleDuration = Period / 4;
-  localparam int BMedDutyCycleDuration = Period / 2;
-  localparam int BFullDutyCycleDuration = Period / 1;
-
-  logic blank_hours_internal;
-  logic blank_minutes_internal;
-  logic blank_seconds_internal;
 
   assign blank_hours   = blank_hours_internal || pwm_out;
   assign blank_minutes = blank_minutes_internal || pwm_out;
@@ -84,8 +85,9 @@ module user_top_brightness_wrapper #(
 
 
   logic [(PeriodWidth-1):0] duty_threshold;
+  wire [1:0] switch_input_mode = sw[9:8];
   always_comb
-    unique case (sw[9:8])
+    unique case (switch_input_mode)
       BDim:  duty_threshold = PeriodWidth'(BDimDutyCycleDuration - 1);
       BLow:  duty_threshold = PeriodWidth'(BLowDutyCycleDuration - 1);
       BMed:  duty_threshold = PeriodWidth'(BMedDutyCycleDuration - 1);

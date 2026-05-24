@@ -80,30 +80,30 @@ async def test_tick_fires_and_period(dut):
         # Tick is permanently high while running
         for _ in range(5):
             await step(dut)
-            assert (
-                int(dut.tick.value) == 1
-            ), "tick must be permanently high when CYCLE_COUNT=1 and run=1"
+            assert int(dut.tick.value) == 1, (
+                "tick must be permanently high when CYCLE_COUNT=1 and run=1"
+            )
         return
 
     # First period: tick fires on the (N-1)-th enabled edge
     first_fire = N - 1
     for i in range(first_fire - 1):
         await step(dut)
-        assert (
-            int(dut.tick.value) == 0
-        ), f"tick must stay low before cycle {first_fire} (cycle {i + 1})"
+        assert int(dut.tick.value) == 0, (
+            f"tick must stay low before cycle {first_fire} (cycle {i + 1})"
+        )
     await step(dut)
-    assert (
-        int(dut.tick.value) == 1
-    ), f"tick must assert on the {first_fire}-th enabled clock edge"
+    assert int(dut.tick.value) == 1, (
+        f"tick must assert on the {first_fire}-th enabled clock edge"
+    )
 
     # Subsequent periods: N edges each (one reset-cycle overhead)
     for period in range(2, 4):
         for i in range(N - 1):
             await step(dut)
-            assert (
-                int(dut.tick.value) == 0
-            ), f"period {period}: tick must be low at cycle {i + 1}"
+            assert int(dut.tick.value) == 0, (
+                f"period {period}: tick must be low at cycle {i + 1}"
+            )
         await step(dut)
         assert int(dut.tick.value) == 1, f"tick must fire at end of period {period}"
 
@@ -158,9 +158,9 @@ async def test_counter_resets_on_stop(dut):
             f"(cycle {i + 1}); counter did not reset"
         )
     await step(dut)
-    assert (
-        int(dut.tick.value) == 1
-    ), f"tick must fire after {first_fire} edges following re-enable"
+    assert int(dut.tick.value) == 1, (
+        f"tick must fire after {first_fire} edges following re-enable"
+    )
 
 
 @cocotb.test()
@@ -184,18 +184,26 @@ async def test_moore_fsm(dut):
         await Timer(MID_CYCLE_DELAY_NS, unit="ns")
         dut.run.value = 1
         await settle()
-        assert int(dut.tick.value) == 0, "tick must not change immediately when run goes high (N=1)"
+        assert int(dut.tick.value) == 0, (
+            "tick must not change immediately when run goes high (N=1)"
+        )
         await RisingEdge(dut.clk)
         await settle()
-        assert int(dut.tick.value) == 1, "tick must go high after clock edge when run goes high (N=1)"
+        assert int(dut.tick.value) == 1, (
+            "tick must go high after clock edge when run goes high (N=1)"
+        )
         # Now toggle run low mid-cycle, tick should not change until next clock edge
         await Timer(MID_CYCLE_DELAY_NS, unit="ns")
         dut.run.value = 0
         await settle()
-        assert int(dut.tick.value) == 1, "tick must not change immediately when run goes low (N=1)"
+        assert int(dut.tick.value) == 1, (
+            "tick must not change immediately when run goes low (N=1)"
+        )
         await RisingEdge(dut.clk)
         await settle()
-        assert int(dut.tick.value) == 0, "tick must go low after clock edge when run goes low (N=1)"
+        assert int(dut.tick.value) == 0, (
+            "tick must go low after clock edge when run goes low (N=1)"
+        )
         return
 
     # N > 1 case (original test)
@@ -228,6 +236,40 @@ async def test_moore_fsm(dut):
 
 
 @cocotb.test()
+async def test_correct_cycle_count1(dut):
+    """
+    Test that when CYCLE_COUNT is 1 the rrg simply behaves as a 1-tick
+        buffer on the input.
+    """
+    start_clock(dut)
+    dut.run.value = 0
+    await RisingEdge(dut.clk)
+
+    N = int(dut.CYCLE_COUNT.value)
+    if N != 1:
+        return
+    cocotb.log.info("Testing restartable_rate_generator with CYCLE_COUNT=1")
+
+    for k in range(10):
+        if k == 9:
+            dut.run.value = 1
+        assert int(dut.tick.value) == 0, (
+            " tick must be low when run was previously low "
+        )
+        await step(dut)
+
+    for k in range(5):
+        if k == 4:
+            dut.run.value = 0
+        assert int(dut.tick.value) == 1, (
+            " tick must be high when run was previously high "
+        )
+        await step(dut)
+
+    assert int(dut.tick.value) == 0, " tick must be low when run was previously low "
+
+
+@cocotb.test()
 async def test_comprehensive(dut):
     """Comprehensive test reading CYCLE_COUNT from the DUT at runtime.
 
@@ -246,9 +288,9 @@ async def test_comprehensive(dut):
         cocotb.log.info("CYCLE_COUNT=1: tick must be permanently high")
         for _ in range(10):
             await step(dut)
-            assert (
-                int(dut.tick.value) == 1
-            ), "tick must be permanently high when CYCLE_COUNT=1"
+            assert int(dut.tick.value) == 1, (
+                "tick must be permanently high when CYCLE_COUNT=1"
+            )
         return
 
     # Reset to a known state
@@ -287,19 +329,19 @@ async def test_comprehensive(dut):
     assert int(dut.tick.value) == 0, "tick should not be high before run is deasserted"
     dut.run.value = 0
     await step(dut)
-    assert (
-        int(dut.tick.value) == 0
-    ), "tick must not be asserted on the clock edge where run is deasserted"
+    assert int(dut.tick.value) == 0, (
+        "tick must not be asserted on the clock edge where run is deasserted"
+    )
     dut.run.value = 1
     for i in range(N - 2):
         await step(dut)
-        assert (
-            int(dut.tick.value) == 0
-        ), f"tick must not be asserted {i + 1} cycle(s) after restart"
+        assert int(dut.tick.value) == 0, (
+            f"tick must not be asserted {i + 1} cycle(s) after restart"
+        )
     await step(dut)
-    assert (
-        int(dut.tick.value) == 1
-    ), f"tick must be asserted exactly {N - 1} cycles after restart"
+    assert int(dut.tick.value) == 1, (
+        f"tick must be asserted exactly {N - 1} cycles after restart"
+    )
 
     # --- run->tick has no combinational dependence ---
     cocotb.log.info("run->tick has no combinational dependence")
@@ -312,12 +354,12 @@ async def test_comprehensive(dut):
     await Timer(MID_CYCLE_DELAY_NS, unit="ns")
     dut.run.value = 0
     await settle()
-    assert (
-        int(dut.tick.value) == tick_before
-    ), "tick changed immediately after mid-cycle run toggle"
+    assert int(dut.tick.value) == tick_before, (
+        "tick changed immediately after mid-cycle run toggle"
+    )
     await RisingEdge(dut.clk)
     await settle()
-    assert (
-        int(dut.tick.value) == 0
-    ), "tick must be low on the first rising edge after run is deasserted"
+    assert int(dut.tick.value) == 0, (
+        "tick must be low on the first rising edge after run is deasserted"
+    )
     dut.run.value = 1

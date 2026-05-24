@@ -43,6 +43,7 @@ module user_top_timer_v1 #(
   logic hours_borrow_out;
   /* verilator lint_on UNUSEDSIGNAL */
 
+  logic running = 1'b0;
 
   // Seconds
   logic seconds_tick;
@@ -115,8 +116,6 @@ module user_top_timer_v1 #(
   assign minutes_disp = 7'(minutes);
   assign hours_disp   = 7'(hours);
 
-
-  //   logic rst_seconds;
   // Derive 1 Hz from the system clock
   restartable_rate_generator #(
       .CYCLE_COUNT(CYCLES_PER_SECOND)
@@ -129,13 +128,6 @@ module user_top_timer_v1 #(
 
   logic all_zeroes;
   assign all_zeroes = (hours == 0 && minutes == 0 && seconds == 0);
-  //   assign all_zeroes = ({hours_disp, minutes_disp, seconds_disp} == '0);
-  //   logic prev_zeroes = 1'b1;
-  //   always_ff @(posedge clk) prev_zeroes <= all_zeroes;
-
-
-
-  logic running = 1'b0;
 
   always_ff @(posedge clk) begin
     // stop timer when entering edit mode
@@ -149,9 +141,9 @@ module user_top_timer_v1 #(
   assign minutes_tick = seconds == '0 && seconds_tick;
   assign hours_tick = minutes == '0 && minutes_tick;
 
-  assign seconds_clr = '0;  //minutes_tick;  //seconds_borrow_out;
-  assign minutes_clr = '0;  //hours_tick;  // minutes_borrow_out;
-  assign hours_clr = '0;  //hours == '0 && hours_tick;  //hours_borrow_out;
+  assign seconds_clr = '0;
+  assign minutes_clr = '0;
+  assign hours_clr = '0;
 
   // --------------
   // Mode Selection
@@ -165,7 +157,6 @@ module user_top_timer_v1 #(
       .button(button[3]),
       .mode_enable(mode_enable)
   );
-  //   assign rst_seconds  = (mode_enable[0] && button[3]);
 
   assign seconds_edit = mode_enable[0];
   assign minutes_edit = mode_enable[1];
